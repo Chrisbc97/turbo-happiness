@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Viaje a Colombia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #0f172a;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      background: #1e293b;
+      padding: 30px 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #38bdf8;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      background-color: #334155;
+      color: #f1f5f9;
+    }
+
+    .rate, .result {
+      font-size: 16px;
+      color: #cbd5e1;
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      text-align: left;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Viaje a Colombia</h2>
+
+    <label for="crc">Colones (CRC):</label>
+    <input type="number" id="crc" placeholder="₡" oninput="convertirDesdeCRC()">
+
+    <label for="cop">Pesos Colombianos (COP):</label>
+    <input type="number" id="cop" placeholder="$" oninput="convertirDesdeCOP()">
+
+    <p class="rate" id="tasa">Obteniendo tasa de cambio...</p>
+    <p class="result" id="resultado"></p>
+
+    <div class="footer">Tasa en tiempo real con exchangerate.host</div>
+  </div>
+
+  <script>
+    let tasa = 0;
+    let actualizando = false;
+
+    async function obtenerTasa() {
+      try {
+        const res = await fetch('https://api.exchangerate.host/latest?base=CRC&symbols=COP');
+        const data = await res.json();
+        tasa = data.rates.COP;
+        document.getElementById('tasa').innerText = `1 CRC = ${tasa.toFixed(2)} COP`;
+      } catch (e) {
+        document.getElementById('tasa').innerText = 'Error al obtener la tasa';
+      }
+    }
+
+    function convertirDesdeCRC() {
+      if (actualizando) return;
+      actualizando = true;
+      const crc = parseFloat(document.getElementById('crc').value);
+      const cop = isNaN(crc) ? '' : (crc * tasa).toFixed(2);
+      document.getElementById('cop').value = cop;
+      actualizando = false;
+    }
+
+    function convertirDesdeCOP() {
+      if (actualizando) return;
+      actualizando = true;
+      const cop = parseFloat(document.getElementById('cop').value);
+      const crc = isNaN(cop) ? '' : (cop / tasa).toFixed(2);
+      document.getElementById('crc').value = crc;
+      actualizando = false;
+    }
+
+    obtenerTasa();
+  </script>
+</body>
+</html>
